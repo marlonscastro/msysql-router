@@ -1,5 +1,5 @@
 FROM debian:buster-slim
-
+USER root
 # add our user and group first to make sure their IDs get assigned consistently, regardless of whatever dependencies get added
 RUN groupadd -r mysql && useradd -r -g mysql mysql
 
@@ -20,17 +20,17 @@ RUN set -x \
 	&& gosu nobody true \
 	&& apt-get purge -y --auto-remove ca-certificates wget
 
-COPY mysql-apt-config_0.8.15-1_all.deb /tmp 
-# COPY mysql-router-community_8.0.19-1debian10_amd64.deb /tmp 
-# COPY mysql-shell_8.0.19-1debian10_amd64.deb /tmp 
+# COPY mysql-apt-config_0.8.15-1_all.deb /tmp 
+COPY mysql-router-community_8.0.19-1debian10_amd64.deb /tmp 
+COPY mysql-shell_8.0.19-1debian10_amd64.deb /tmp 
 
 RUN apt-get update && \
 	apt-get install -y libcurl4 libpython3.7 && \
 	apt --fix-broken install
 
-# RUN dpkg -i /tmp/mysql-router-community_8.0.19-1debian10_amd64.deb && \
-# 	dpkg -i /tmp/mysql-shell_8.0.19-1debian10_amd64.deb && \
-# 	rm -Rf /tmp/*
+RUN dpkg -i /tmp/mysql-router-community_8.0.19-1debian10_amd64.deb && \
+ 	dpkg -i /tmp/mysql-shell_8.0.19-1debian10_amd64.deb && \
+ 	rm -Rf /tmp/*
 
 
 RUN mkdir /docker-entrypoint-initdb.d
@@ -98,5 +98,5 @@ CMD ["mysqld"]
 # docker run -p 3307:3306 --name node1 -e MYSQL_ROOT_PASSWORD=16scm4 -d my8innodb
 
 # Deploy no Openshift 
-# oc new-app https://github.com/marlonscastro/mysql-node.git --strategy=docker -e MYSQL_ROOT_PASSWORD=16scm4 --name my8
+# oc new-app https://github.com/marlonscastro/msysql-router.git --strategy=docker -e MYSQL_ROOT_PASSWORD=16scm4 --name node1
 

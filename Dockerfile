@@ -1,5 +1,5 @@
 FROM debian:buster-slim
-USER root
+USER 0
 # add our user and group first to make sure their IDs get assigned consistently, regardless of whatever dependencies get added
 RUN groupadd -r mysql && useradd -r -g mysql mysql
 
@@ -87,16 +87,20 @@ VOLUME /var/lib/mysql
 # Config files
 COPY config/ /etc/mysql/
 COPY docker-entrypoint.sh /usr/local/bin/
+
+USER 1001
+
 RUN ln -s usr/local/bin/docker-entrypoint.sh /entrypoint.sh # backwards compat
 ENTRYPOINT ["docker-entrypoint.sh"]
 
 EXPOSE 3306 33060
 CMD ["mysqld"]
 
+
 # docker network create cluster --subnet=192.168.0.0/16
 # docker run -d --net=cluster --name=node1 --ip=192.168.0.2 -e MYSQL_ROOT_PASSWORD=16scm4 my8innodb mysqld
 # docker run -p 3307:3306 --name node1 -e MYSQL_ROOT_PASSWORD=16scm4 -d my8innodb
 
 # Deploy no Openshift 
-# oc new-app https://github.com/marlonscastro/msysql-router.git --strategy=docker -e MYSQL_ROOT_PASSWORD=16scm4 --name node1
-
+# oc new-app https://github.com/marlonscastro/msysql-router.git --strategy=docker -e MYSQL_ROOT_PASSWORD=16scm4 --name router
+# Depois adiciona um Storage Mount com 1Gi no Deployment Config path::  /var/lib/mysql
